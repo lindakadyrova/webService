@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ReST Client</title>
+    <script src="./client.js" defer></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css"
+    />
+    <style>
+      #output {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      h1 {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Notes Web-Client</h1>
+    <form id="input">
+      <div class="row">
+        <div class="col-sm-12 col-md-3">
+          <label for="title">Title</label>
+        </div>
+        <div class="col-sm-12 col-md-9">
+          <input
+            class="doc"
+            style="width: 90%"
+            type="text"
+            name="title"
+            id="title"
+            placeholder="add note title"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-3">
+          <label for="description">Description</label>
+        </div>
+        <div class="col-sm-12 col-md-9">
+          <textarea
+            class="doc"
+            style="width: 90%"
+            name="description"
+            id="description"
+          ></textarea>
+        </div>
+      </div>
+      <button type="submit">Create</button>
+    </form>
+    <div id="output"></div>
+
+    <template id="note">
+      <div class="card">
+        <h3 class="doc"></h3>
+        <p class="doc"></p>
+      </div>
+    </template>
+  </body>
+</html>
