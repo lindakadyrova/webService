@@ -1,5 +1,22 @@
 # ReST Web Service Example
 
+## Goal of this Exercise
+
+In this exercise you will implement and extend a simple REST API using Node.js and Express.
+
+By the end of the exercise you should be able to:
+
+- understand the structure of a REST API
+- implement CRUD endpoints
+- validate user input
+- return proper HTTP status codes
+- work with HTTP headers
+- enable CORS for browser clients
+- extend an API with additional resources
+
+## Architecture Overview
+
+
 ## **Introduction to RESTful Web Services**
 
 ### **What Are RESTful Web Services?**
@@ -10,7 +27,7 @@ REST (Representational State Transfer) is an **architectural style** for designi
 |-------------------|-----------------------------------|--------------------------------------------------------------|
 | **Purpose**       | Renders HTML for user interaction | Provides structured data for applications                    |
 | **Communication** | Browser requests pages            | API calls return JSON or XML                                 |
-| **State**         | Can maintain session state        | Stateless requests (each request is independent)             |
+| **State** | Often maintains session state | Stateless request handling (each request contains all necessary information) |
 | **Best For**      | User interfaces, websites         | Machine-to-machine communication, mobile apps, microservices |
 
 ### **When to Use REST APIs?**
@@ -23,7 +40,7 @@ RESTful Web Services are ideal for **exposing data and functionalities** to diff
 ### **How REST Works – A Basic Flow**
 1. **Client sends an HTTP request** to a REST API using standard methods (`GET`, `POST`, `PUT`, `DELETE`).
 2. **Server processes the request** and interacts with a database if necessary.
-3. **Server sends back a response** in JSON or XML format.
+3. **Server returns a response** in JSON or XML format, including status code and response body.
 4. **Each request is stateless**, meaning no client data is stored between requests.
 
 This exercise will guide you through **building a REST API using Express.js**, handling CRUD operations, structuring endpoints properly, and responding with correct HTTP status codes.
@@ -31,19 +48,45 @@ This exercise will guide you through **building a REST API using Express.js**, h
 
 ## About the exercise(s)
 
-> For this exercise, we provide a base [node](https://nodejs.org/en/) / [express](https://expressjs.com/) application, which should be extended by you.
+For this exercise, we provide a base [Node.js](https://nodejs.org/en/) / [Express](https://expressjs.com/) application, which should be extended by you. During the exercise you will implement new functionality and improve the API.
 
-> **DOCUMENTATION**: Important for this and upcoming exercises is to create a documentation of ALL checkpoints, create a [repository](https://git-iit.fh-joanneum.at/msd-webserv/ss25-stduents)
+### Documentation
+For all checkpoints you must maintain a short documentation in your own repository, create a [repository](https://git-iit.fh-joanneum.at/msd-webserv/ss26-stduents).
+The documentation should include:
 
-> **CHECKPOINT**: You will find multiple **CHECKPOINTS** during this and all other exercise. When you pass that checkpoint, ask your lecturer to check your steps to get points for grading. In some cases only a Screenshot and a Teams message is necessary to indicate your current state.
+- explanation of your implementation
+- relevant code snippets
+- screenshots of successful API calls
+- answers to the checkpoint questions
+
+### Checkpoints
+
+Throughout the exercise you will encounter several **CHECKPOINTS**.
+
+When you reach a checkpoint:
+
+1. Document your results
+2. ask the lecturer if you need help
+3. ask for feedback if you need some
 
 ## Prerequisites
-* [Node](https://nodejs.org/en/)
-  * we recommend current [LTS](https://nodejs.org/dist/latest-v22.x/)
+Make sure the following tools are installed:
+
+- [Node.js](https://nodejs.org/en/) (recommended: current [LTS](https://nodejs.org/dist/latest-v24.x/) version)
+- npm (comes with Node)
+- Git
+- [Postman](https://www.postman.com/) or another API testing tool, e.g. [Bruno](https://www.usebruno.com/)
+
 
 
 ## First Steps
-install current dependencies
+check your installed versions
+```console
+node -v
+npm -v
+```
+
+install or update to latest / recommended dependencies
 ```console
 npm install
 ```
@@ -57,9 +100,12 @@ On Windows, you may get an error on `npm ci`. When it doesn't work, try to insta
 npm install sqlite3@latest
 npm install
 ```
-You should then use sqlite3 package version **5.x.x**.
+You should then use sqlite3 package version > **5.x.x**.
 
-### #What comes with this project?
+### What comes with this project?
+
+This project already contains a minimal Express application with a simple resource called `notes`.
+Your task is to explore the structure and extend the API.
 
 * [express](https://expressjs.com/), fast web framework to create web-services
 ```console
@@ -67,7 +113,7 @@ npm install --save express
  ```
 * [dotenv](https://www.npmjs.com/package/dotenv) to load custom environment variables from [`.env`](.env.EXAMPLE) file, what includes following configuration in this case
   * `PORT` to access web-service on PORT 8080
-  * `DATABASE_URL` to define sqlite file to create/use database file 
+  * `DATABASE_URL` to define sqlite file to create/use database file
 ```console
  npm install --save dotenv
 ```
@@ -77,10 +123,14 @@ npm install --save sqlite3
  ```
 
 ### Project structure
+The project follows a simple layered structure that separates responsibilities.
+
+Routing files define the available endpoints, controllers handle the HTTP logic and request/response handling, and models interact with the database layer.  
+This separation makes the API easier to maintain and extend.
 
 > *
 > * └───[`notes`](notes): directory for our 'notes' resource
->   * [`controller.js`](notes/controller.js): "business" logic to handle different HTTP calls on 'notes' resource.
+    >   * [`controller.js`](notes/controller.js): "business" logic to handle different HTTP calls on 'notes' resource.
 >   * [`index.js`](notes/index.js): routing configuration for 'notes' resource
 >   * [`model.js`](notes/model.js): db handler for 'notes' resource
 > * └───[`public`](public): directory with minimal frontend
@@ -89,24 +139,30 @@ npm install --save sqlite3
 > * [`package.json`](package.json): node configuration/dependencies file
 > * [`server.js`](server.js): start point for our web-service and webserver. setups express and starts listener.
 
+| File | comment |
+| ---- | ------- |
+|controller.js | handles HTTP logic|
+|model.js | database interaction |
+| index.js | routing configuration |
+
 start application server
 ```bashvb 
 node server.js
-## or
+  or
 npm start
 ```
 
 ## Quick Overview about REST Structure
 
-depending on the REST example of notes management, we will take a quick look at important relations between REST, HTTP and SQL. 
+depending on the REST example of notes management, we will take a quick look at important relations between REST, HTTP and SQL. Typical responses for successful operations are:
 
-| 	URL		    | 	HTTP Verb	 | 	CRUD 	     | 	SQL   		  | 	comment 	   		       |
-|-----------|-------------|-------------|------------|-----------------------|
-| /notes	   | POST 		     | 	CREATE		   | 	INSERT	   | insert new note  		   |
-| /notes    | GET 			     | 	READ		     | 	SELECT  	 | read **all** notes  	 |
-| /notes/1  | GET 			     | 	READ		     | 	SELECT  	 | read **one** note 	   |
-| /notes/1	 | PUT 			     | 	UPDATE	  	 | 	UPDATE	   | update **one** note	  |
-| /notes/1	 | DELETE		    | 	DELETE  		 | 	DELETE  	 | removes **one** note  |
+| 	URL		    | 	HTTP Verb	 | HTTP Response | 	CRUD 	     | 	SQL   		  | 	comment 	   		       | 
+|-----------|-------------|-------------|-------|------------|-----------------------|
+| /notes	   | POST 		     | 	`201 Created` and the created resource |CREATE		   | 	INSERT	   | insert new note  		   |
+| /notes    | GET 			     | `200 OK` and the requested resource|	READ		     | 	SELECT  	 | read **all** notes  	 |
+| /notes/1  | GET 			     |  `200 OK` and the requested resources |	READ		     | 	SELECT  	 | read **one** note 	   |
+| /notes/1	 | PUT 			     | `200 OK` and the updated resource (or `204 No Content` when no body is returned) |	UPDATE	  	 | 	UPDATE	   | update **one** note	  |
+| /notes/1	 | DELETE		    | `204 No Content`| 	DELETE 		 | 	DELETE  	 | removes **one** note  |
 
 check it out with your browser, [cURL](https://curl.se/) or [Postman](https://www.postman.com/) for example.
 
@@ -120,13 +176,19 @@ When everything is up and running, checkout the code. Take a look at the structu
 * What will be the **status code** of each (successful) action?
 * What happens when you **POST** the same data multiple times?
 * What happens when you **POST** or **PUT** invalid data?
+* What happens if you request a resource that does not exist?
 
 > **CHECKPOINT RE-001: Create a document and answer above questions. Also indicate your current state within the teams call.**
 
 
 ## Extending the API
- 
-As you noticed above, this ReST API is very simple and does not handle errors well. It is now in you to extend/improve the API.
+
+As you noticed above, this ReST API is very simple and does not handle errors well. It is now your task to extend/improve the API.
+
+Most of your changes will be implemented in:
+
+- notes/controller.js
+- notes/model.js
 
 ### User Input
 
@@ -139,6 +201,10 @@ the client using a useful error-message and status code.
 * the fields `title` and `description` must be part of the request and of type "string"
 * `title` must have at least 3 characters, `description` at least 5
 
+**Hint**:
+Important: The example below uses the field `firstname` only to demonstrate the validation logic.  
+For this exercise you must apply the same concept to the **notes resource**, validating `title` and `description`.
+
 **Example Validation by yourself**:
 ```js
   const { firstname, lastname } = req.body;
@@ -149,9 +215,9 @@ the client using a useful error-message and status code.
   }
 ```
 
-your webservice should not be crash when invalid data has been provided!
+your webservice should not crash when invalid data has been provided!
 
-\[OPTIONAL\]: manually checks could be very annoying, especially when you have much more fields than just two. A more efficient way is to use a library for that, 
+\[OPTIONAL\]: manually checks could be very annoying, especially when you have much more fields than just two. A more efficient way is to use a library for that,
 providing rules to work with. When enough time is left, checkout [express-validator](https://express-validator.github.io/docs/) to solve that kind of problem.
 
 **Example Validation with Middleware**:
@@ -215,7 +281,30 @@ Checkout the [Response `set`](https://expressjs.com/en/4x/api.html#res.set) func
 Not only in responses headers appear, also in requests you will find headers that could give you additional information, given by the user calling.
 
 For example the [`Accept`-Header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept), with that the client could ask for a specific format for the response.
-Because we only will response JSON at this point, extend your API to return an error, when something other then `application/json`, `*/json` or `*/*` will be accepted by the client.
+Because we only will respond with JSON at this point, extend your API to return an error, when something other than `application/json`, `*/json` or `*/*` will be accepted by the client.
+
+When the client requests a format that is not supported by your API, return the HTTP status code **406 Not Acceptable**.
+
+Example:
+
+If the client sends:
+```curl
+Accept: application/xml
+```
+your API should respond with:
+```curl
+HTTP/1.1 406 Not Acceptable
+```
+
+```js
+const acceptHeader = req.headers.accept;
+
+if (!acceptHeader.includes("application/json") && acceptHeader !== "*/*") {
+  return res.status(406).json({
+    error: "Only application/json responses are supported"
+  });
+}
+```
 
 \[OPTIONAL\]: Where to check for the request header? In each route separate? Possible, but maybe this will end in a bunch of code-duplication/repeated call for the same function. When enough time is left, checkout [express middleware](https://expressjs.com/en/guide/using-middleware.html).
 
@@ -291,8 +380,15 @@ Now with CORS allowed for everyone, checkout the [client](http://localhost:8080/
 * working with CORS **active**: [http://127.0.0.1:8080/client](http://127.0.0.1:8080/client)
 * working with CORS **disabled** by code integration: [http://localhost:8080/client](http://localhost:8080/client)
 
+Browsers treat different hostnames as different origins. Therefore requests from localhost and 127.0.0.1 may trigger CORS checks.
 
 > **CHECKPOINT RE-004: Update your document and add screenshots and code-snippets, that show that your client could sucessfully add new notes and display them, without the need of a reload of the side.**
+
+Implement the missing POST request in client.js so that
+
+- a new note is sent to the API
+- the response is displayed in the UI
+- the page does not reload
 
 
 ## New Endpoint(s)
@@ -309,10 +405,37 @@ A user consists of:
   * `city`: string
 
 
+Implement at least the following endpoints:
+
+| method | endpoint URI |
+| ------ | ------------ |
+|GET | /users|
+|GET | /users/{id}|
+|POST | /users|
+|PUT | /users/{id}|
+|DELETE | /users/{id}|
+
 > **CHECKPOINT RE-005: Update your document and add screenshots and code-snippets, that show that your `/users` endpoint is working.**
 
-\[OPTIONAL\]: Also `/users/<id>/address` work as shown in the [slides](https://elearning.fh-joanneum.at/pluginfile.php/73875/mod_resource/content/0/02_rest%28ful%29_webservice_pn.pdf) and [additional instructions](users.md) 
+\[OPTIONAL\]: Also `/users/<id>/address` work as shown in the [slides](https://elearning.fh-joanneum.at/pluginfile.php/73875/mod_resource/content/0/02_rest%28ful%29_webservice_pn.pdf) and [additional instructions](users.md)
 
+## Final Result
+
+At the end of this exercise your API should support:
+
+- CRUD operations for notes
+- input validation
+- proper HTTP status codes
+- response headers
+- CORS support
+- a simple browser client
+- a second resource (`users`)
+
+Your documentation must include:
+
+- answers to all checkpoint questions
+- screenshots of API calls
+- short explanations of your implementation
 
 ## References
 * [Node - Das umfassende Handbuch](https://www.rheinwerk-verlag.de/nodejs-das-umfassende-handbuch/)
