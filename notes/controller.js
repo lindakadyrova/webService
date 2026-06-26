@@ -4,11 +4,15 @@ const { body, validationResult } = require("express-validator");
 
 const validateNote = [
   body("title")
-    .isString().withMessage("Title must be a string.")
-    .isLength({ min: 3 }).withMessage("Title must be at least 3 characters long."),
+    .isString()
+    .withMessage("Title must be a string.")
+    .isLength({ min: 3 })
+    .withMessage("Title must be at least 3 characters long."),
   body("description")
-    .isString().withMessage("Description must be a string.")
-    .isLength({ min: 5 }).withMessage("Description must be at least 5 characters long."),
+    .isString()
+    .withMessage("Description must be a string.")
+    .isLength({ min: 5 })
+    .withMessage("Description must be at least 5 characters long."),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -46,59 +50,21 @@ function detailAction(req, res) {
 }
 
 function createAction(req, res) {
-  // const { title, description } = req.body;
-
-  // if (!title || typeof title !== "string" || title.length < 3) {
-  //   return res
-  //     .status(400)
-  //     .json({ error: "Title must be at least 3 characters long" });
-  // }
-
-  // if (
-  //   !description ||
-  //   typeof description !== "string" ||
-  //   description.length < 5
-  // ) {
-  //   return res
-  //     .status(400)
-  //     .json({ error: "Description must be at least 5 characters long" });
-  // }
-  
-
+  if (!req.is('application/json')) {
+    return res.status(415).json({ error: "Content-Type must be application/json" });
+  }
   console.log("create");
-  const newNote = {
-    title: req.body.title,
-    description: req.body.description,
-  };
+  const { title, description } = req.body;
   model
     .save({ title, description })
     .then((note) => {
       console.log("created", JSON.stringify(note));
-      res.status(201).json(note);
+      res.status(201).location(`localhost:8080/notes/${note.id}`).json(note);
     })
     .catch((err) => handleError(err, req, res));
 }
 
 function updateAction(req, res) {
-  // const { title, description } = req.body;
-  // console.log("update");
-
-  // if (!title || typeof title !== "string" || title.length < 3) {
-  //   return res
-  //     .status(400)
-  //     .json({ error: "Title must be at least 3 characters long" });
-  // }
-
-  // if (
-  //   !description ||
-  //   typeof description !== "string" ||
-  //   description.length < 5
-  // ) {
-  //   return res
-  //     .status(400)
-  //     .json({ error: "Description must be at least 5 characters long" });
-  // }
-
   const note = {
     id: req.params.id,
     title: req.body.title,
