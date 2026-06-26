@@ -1,11 +1,11 @@
-'use strict';
-const { NODE_ENV } = require('../util/config');
-const sqlite = require('sqlite3');
-const db = new sqlite.Database('./notes.db');
+"use strict";
+const { NODE_ENV } = require("../util/config");
+const sqlite = require("sqlite3");
+const db = new sqlite.Database("./notes.db");
 
 // drop database only for developing purpose, restart server while development will cleanup current data
-if (NODE_ENV === 'development') {
-  db.run('DROP TABLE IF EXISTS notes');
+if (NODE_ENV === "development") {
+  db.run("DROP TABLE IF EXISTS notes");
 }
 
 db.run(
@@ -16,22 +16,22 @@ db.run(
 );`,
   () => {
     // insert demo data while in development environment
-    if (NODE_ENV === 'development') {
+    if (NODE_ENV === "development") {
       const demoNotes = [
-        { title: 'first', description: 'first note' },
-        { title: 'learn rest', description: 'learn how rest works' },
+        { title: "first", description: "first note" },
+        { title: "learn rest", description: "learn how rest works" },
       ];
       demoNotes.forEach((note) => {
         insert(note);
       });
     }
-  }
+  },
 );
 
 // get all notes
 function getAll() {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM notes';
+    const query = "SELECT * FROM notes";
     const stmt = db.prepare(query);
     stmt.all([], (err, result) => {
       if (err) {
@@ -47,9 +47,9 @@ function getOne(id) {
   return new Promise((resolve, reject) => {
     console.log('getOne', id);
     if (id == 666) {
-      return reject(new Error('number of the beast'));
+      return reject(new Error("number of the beast"));
     }
-    const query = 'SELECT * FROM notes WHERE id = ?';
+    const query = "SELECT * FROM notes WHERE id = ?";
     const stmt = db.prepare(query);
     stmt.get([id], (err, result) => {
       if (err) {
@@ -63,8 +63,9 @@ function getOne(id) {
 // insert a new note
 function insert(note) {
   return new Promise((resolve, reject) => {
-    console.log('insert new note:', JSON.stringify(note));
-    const query = 'INSERT INTO notes (title, description) VALUES (?, ?)';
+    
+    console.log("insert new note:", JSON.stringify(note));
+    const query = "INSERT INTO notes (title, description) VALUES (?, ?)";
     const stmt = db.prepare(query);
     stmt.run([note.title, note.description], function (err) {
       if (err) {
@@ -79,8 +80,8 @@ function insert(note) {
 // update an existing note
 function update(note) {
   return new Promise((resolve, reject) => {
-    console.log('update note:', JSON.stringify(note));
-    const query = 'UPDATE notes SET title = ?, description = ? WHERE id = ?';
+    console.log("update note:", JSON.stringify(note));
+    const query = "UPDATE notes SET title = ?, description = ? WHERE id = ?";
     const stmt = db.prepare(query);
     stmt.run([note.title, note.description, note.id], (err) => {
       if (err) {
@@ -94,7 +95,7 @@ function update(note) {
 // delete a note
 function remove(id) {
   return new Promise((resolve, reject) => {
-    const query = 'DELETE FROM notes WHERE id = ?';
+    const query = "DELETE FROM notes WHERE id = ?";
     const stmt = db.prepare(query);
     stmt.run([id], (err) => {
       if (err) {

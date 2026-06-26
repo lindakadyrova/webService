@@ -1,8 +1,25 @@
-'use strict';
-const model = require('./model');
+"use strict";
+const model = require("./model");
+const { body, validationResult } = require("express-validator");
+
+const validateNote = [
+  body("title")
+    .isString().withMessage("Title must be a string.")
+    .isLength({ min: 3 }).withMessage("Title must be at least 3 characters long."),
+  body("description")
+    .isString().withMessage("Description must be a string.")
+    .isLength({ min: 5 }).withMessage("Description must be at least 5 characters long."),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];
 
 function listAction(req, res) {
-  console.log('list overview');
+  console.log("list overview");
   model
     .get()
     .then((notes) => {
@@ -13,7 +30,7 @@ function listAction(req, res) {
 }
 
 function detailAction(req, res) {
-  console.log('detail:', req.params.id);
+  console.log("detail:", req.params.id);
   model
     .get(req.params.id)
     .then((note) => {
@@ -29,22 +46,59 @@ function detailAction(req, res) {
 }
 
 function createAction(req, res) {
-  console.log('create');
+  // const { title, description } = req.body;
+
+  // if (!title || typeof title !== "string" || title.length < 3) {
+  //   return res
+  //     .status(400)
+  //     .json({ error: "Title must be at least 3 characters long" });
+  // }
+
+  // if (
+  //   !description ||
+  //   typeof description !== "string" ||
+  //   description.length < 5
+  // ) {
+  //   return res
+  //     .status(400)
+  //     .json({ error: "Description must be at least 5 characters long" });
+  // }
+  
+
+  console.log("create");
   const newNote = {
     title: req.body.title,
     description: req.body.description,
   };
   model
-    .save(newNote)
+    .save({ title, description })
     .then((note) => {
-      console.log('created', JSON.stringify(note));
+      console.log("created", JSON.stringify(note));
       res.status(201).json(note);
     })
     .catch((err) => handleError(err, req, res));
 }
 
 function updateAction(req, res) {
-  console.log('update');
+  // const { title, description } = req.body;
+  // console.log("update");
+
+  // if (!title || typeof title !== "string" || title.length < 3) {
+  //   return res
+  //     .status(400)
+  //     .json({ error: "Title must be at least 3 characters long" });
+  // }
+
+  // if (
+  //   !description ||
+  //   typeof description !== "string" ||
+  //   description.length < 5
+  // ) {
+  //   return res
+  //     .status(400)
+  //     .json({ error: "Description must be at least 5 characters long" });
+  // }
+
   const note = {
     id: req.params.id,
     title: req.body.title,
@@ -59,7 +113,7 @@ function updateAction(req, res) {
 }
 
 function deleteAction(req, res) {
-  console.log('delete');
+  console.log("delete");
   const id = req.params.id;
   model
     .delete(id)
@@ -68,14 +122,16 @@ function deleteAction(req, res) {
 }
 
 function handleError(err, req, res) {
-  if (typeof err === 'object' && err.message) {
+  if (typeof err === "object" && err.message) {
     err = { error: err.message };
-  } else if (typeof err === 'string') {
+  } else if (typeof err === "string") {
     err = { error: err };
   } else {
-    err = { error: 'unknown error occured' };
+    err = { error: "unknown error occured" };
   }
-  console.log(`ERROR on [${req.method}] via ${req.originalUrl}: [${err.error}]`);
+  console.log(
+    `ERROR on [${req.method}] via ${req.originalUrl}: [${err.error}]`,
+  );
   res.status(500).json(err);
 }
 

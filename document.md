@@ -35,7 +35,7 @@ Es wird jedes mal eine neue Note erstellt (201 created)
 \
 Frage 3: Was passiert, wenn ungültige Daten per POST oder PUT gesendet werden?
 
-Es funktioniert fehelr frei. POST erstellt eine neue note und PUT updatet die note die ausgewählt wird
+Es funktioniert hier fehler frei. POST erstellt eine neue note und PUT updatet die note die ausgewählt wird
 
 \
 Frage 4: Was passiert, wenn Sie eine Ressource anfordern, die nicht existiert?
@@ -45,3 +45,13 @@ GET 404 Not Found
 PUT erstellt die note mit der zuvor nicht ecistenten id
 
 DLEETE gibt einfach 204 No Content
+
+2. C002
+
+manuell
+![alt text](image.png)
+![alt text](image-1.png)
+
+automated validation
+![alt text](image-2.png)
+![alt text](image-3.png)
