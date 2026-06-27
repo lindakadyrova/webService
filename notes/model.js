@@ -45,10 +45,6 @@ function getAll() {
 // get one note by it's id
 function getOne(id) {
   return new Promise((resolve, reject) => {
-    console.log('getOne', id);
-    if (id == 666) {
-      return reject(new Error("number of the beast"));
-    }
     const query = "SELECT * FROM notes WHERE id = ?";
     const stmt = db.prepare(query);
     stmt.get([id], (err, result) => {

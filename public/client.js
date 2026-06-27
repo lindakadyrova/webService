@@ -12,30 +12,29 @@ $input.addEventListener('submit', (event) => {
   };
   console.log(data);
 
-fetch('http://127.0.0.1:8080/notes', {
+fetch('http://127.0.0.1:8080/users', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(data),
 })
   .then((response) => response.json())
-  .then((note) => addNote(note))
+  .then((users) => addUsers(users))
   .catch((err) => console.error(err));
 });
 
 // fetch example. will GET all notes on start
-fetch('http://127.0.0.1:8080/notes')
+fetch('http://127.0.0.1:8080/users')
   .then((response) => response.json())
-  .then((data) => data.forEach(addNote))
+  .then((data) => data.forEach(addUsers))
   .catch((err) => console.error(err));
 
 
 // add a new note to the DOM
-function addNote(note) {
-  console.log(note);
-  const template = document.querySelector('#note');
+function addUsers(users) {
+  console.log(users);
+  const template = document.querySelector('#users');
   const clone = template.content.cloneNode(true);
-  clone.querySelector('h3').textContent = note.title;
-  clone.querySelector('p').textContent = note.description;
+  clone.querySelector('h3').textContent = users.name;
 
   $output.appendChild(clone);
 }
