@@ -12,7 +12,14 @@ $input.addEventListener('submit', (event) => {
   };
   console.log(data);
 
-  // TODO: POST data to API, see https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#supplying_request_options
+fetch('http://127.0.0.1:8080/notes', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data),
+})
+  .then((response) => response.json())
+  .then((note) => addNote(note))
+  .catch((err) => console.error(err));
 });
 
 // fetch example. will GET all notes on start
