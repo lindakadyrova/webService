@@ -1,6 +1,7 @@
 "use strict";
 const model = require("./model");
 const { body, validationResult } = require("express-validator");
+const crypto = require("crypto");
 
 const validateNote = [
   body("title")
@@ -22,6 +23,14 @@ const validateNote = [
   },
 ];
 
+function createEtag(value) {
+  return crypto.createHash("sha1").update(JSON.stringify(value)).digest("hex");
+}
+
+function clearNotesCache() {
+  getAllAction.cache = {};
+}
+
 function listAction(req, res) {
   console.log("list overview");
   model
@@ -33,18 +42,25 @@ function listAction(req, res) {
     .catch((err) => handleError(err, req, res));
 }
 
-function detailAction(req, res) {
-  console.log("detail:", req.params.id);
+function getOneAction(req, res) {
   model
-    .get(req.params.id)
+    .get({ id: req.params.id })
     .then((note) => {
-      if (note) {
-        res.json(note);
-      } else {
-        res
-          .status(404)
-          .json({ error: `could not find note with id [${req.params.id}]` });
+      if (!note) {
+        return res.status(404).json({
+          error: `could not find note with id [${req.params.id}]`,
+        });
       }
+
+      const etag = createEtag(note);
+      res.set("ETag", etag);
+      res.set("Cache-Control", "no-cache");
+
+      if (req.headers["if-none-match"] === etag) {
+        return res.status(304).send();
+      }
+
+      res.json(note);
     })
     .catch((err) => handleError(err, req, res));
 }
@@ -60,6 +76,7 @@ function createAction(req, res) {
   model
     .save({ title, description })
     .then((note) => {
+      clearNotesCache();
       console.log("created", JSON.stringify(note));
       res.status(201).location(`localhost:8080/notes/${note.id}`).json(note);
     })
@@ -78,12 +95,12 @@ function updateAction(req, res) {
   model
     .save(note)
     .then((updatedNote) => {
+      clearNotesCache();
       if (!updatedNote) {
         return res
           .status(404)
           .json({ error: `could not find note with id [${req.params.id}]` });
       }
-
       res.json(updatedNote);
     })
     .catch((err) => handleError(err, req, res));
@@ -96,12 +113,12 @@ function deleteAction(req, res) {
   model
     .delete(id)
     .then((deleted) => {
+      clearNotesCache();
       if (!deleted) {
         return res
           .status(404)
           .json({ error: `could not find note with id [${id}]` });
       }
-
       res.status(204).send();
     })
     .catch((err) => handleError(err, req, res));
@@ -137,15 +154,11 @@ function getAllAction(req, res) {
   }
 
   if (!Number.isInteger(limit) || limit < 1) {
-    return res.status(400).json({
-      error: "limit must be a positive integer",
-    });
+    return res.status(400).json({ error: "limit must be a positive integer" });
   }
 
   if (!Number.isInteger(offset) || offset < 0) {
-    return res.status(400).json({
-      error: "offset must be a non-negative integer",
-    });
+    return res.status(400).json({ error: "offset must be a non-negative integer" });
   }
 
   if (limit > 100) {
@@ -159,15 +172,36 @@ function getAllAction(req, res) {
     offset,
   };
 
+  const cacheKey = JSON.stringify(options);
+  const now = Date.now();
+
+  if (!getAllAction.cache) {
+    getAllAction.cache = {};
+  }
+
+  const entry = getAllAction.cache[cacheKey];
+
+  if (entry && now - entry.timestamp < 30000) {
+    res.set("Cache-Control", "no-store");
+    return res.json(entry.data);
+  }
+
   model
     .get(options)
-    .then((notes) => res.json(notes))
+    .then((notes) => {
+      getAllAction.cache[cacheKey] = {
+        data: notes,
+        timestamp: now,
+      };
+      res.set("Cache-Control", "no-store");
+      res.json(notes);
+    })
     .catch((err) => handleError(err, req, res));
 }
 
 module.exports = {
   listAction,
-  detailAction,
+  getOneAction,
   createAction,
   updateAction,
   deleteAction,

@@ -2,7 +2,7 @@
 const { body, validationResult } = require("express-validator");
 const {
   getAllAction,
-  detailAction,
+  getOneAction,
   createAction,
   updateAction,
   deleteAction,
@@ -27,7 +27,7 @@ const validateNote = [
 ];
 
 router.get('/', getAllAction);
-router.get('/:id', detailAction);
+router.get('/:id', getOneAction);
 router.post('/', validateNote, createAction);
 router.put('/:id', validateNote, updateAction);
 router.delete('/:id', deleteAction);

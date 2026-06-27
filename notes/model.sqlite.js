@@ -140,6 +140,9 @@ function remove(id) {
 
 module.exports = {
   get(filter) {
+    if (typeof filter === "object" && filter.id) {
+      return getOne(filter.id); 
+    }
     if (isNaN(filter)) {
       return getAll(filter);
     }
