@@ -29,20 +29,20 @@ db.run(
 );
 
 // get all notes
-function getAll(filter = {}) {
+function getAll(options = {}) {
   return new Promise((resolve, reject) => {
     let query = "SELECT * FROM notes";
     const params = [];
     const conditions = [];
 
-    if (filter.title) {
+    if (options.title) {
       conditions.push("title LIKE ?");
-      params.push(`%${filter.title}%`);
+      params.push(`%${options.title}%`);
     }
 
-    if (filter.description) {
+    if (options.description) {
       conditions.push("description LIKE ?");
-      params.push(`%${filter.description}%`);
+      params.push(`%${options.description}%`);
     }
 
     if (conditions.length > 0) {
@@ -51,10 +51,22 @@ function getAll(filter = {}) {
 
     query += " ORDER BY id ASC";
 
-    const stmt = db.prepare(query);
-    stmt.all(params, (err, result) => {
-      if (err) return reject(err);
-      resolve(result);
+    if (options.limit !== undefined) {
+      query += " LIMIT ?";
+      params.push(options.limit);
+    }
+
+    if (options.offset !== undefined) {
+      query += " OFFSET ?";
+      params.push(options.offset);
+    }
+
+    db.all(query, params, (err, rows) => {
+      if (err) {
+        return reject(err);
+      }
+
+      resolve(rows);
     });
   });
 }

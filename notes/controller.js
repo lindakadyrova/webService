@@ -50,8 +50,10 @@ function detailAction(req, res) {
 }
 
 function createAction(req, res) {
-  if (!req.is('application/json')) {
-    return res.status(415).json({ error: "Content-Type must be application/json" });
+  if (!req.is("application/json")) {
+    return res
+      .status(415)
+      .json({ error: "Content-Type must be application/json" });
   }
   console.log("create");
   const { title, description } = req.body;
@@ -65,7 +67,7 @@ function createAction(req, res) {
 }
 
 function updateAction(req, res) {
-  console.log('update');
+  console.log("update");
 
   const note = {
     id: req.params.id,
@@ -87,9 +89,8 @@ function updateAction(req, res) {
     .catch((err) => handleError(err, req, res));
 }
 
-
 function deleteAction(req, res) {
-  console.log('delete');
+  console.log("delete");
   const id = req.params.id;
 
   model
@@ -106,7 +107,6 @@ function deleteAction(req, res) {
     .catch((err) => handleError(err, req, res));
 }
 
-
 function handleError(err, req, res) {
   if (typeof err === "object" && err.message) {
     err = { error: err.message };
@@ -122,18 +122,48 @@ function handleError(err, req, res) {
 }
 
 function getAllAction(req, res) {
+  const rawLimit = req.query.limit;
+  const rawOffset = req.query.offset;
 
-  const filter = {
+  let limit = 10;
+  let offset = 0;
+
+  if (rawLimit !== undefined) {
+    limit = Number(rawLimit);
+  }
+
+  if (rawOffset !== undefined) {
+    offset = Number(rawOffset);
+  }
+
+  if (!Number.isInteger(limit) || limit < 1) {
+    return res.status(400).json({
+      error: "limit must be a positive integer",
+    });
+  }
+
+  if (!Number.isInteger(offset) || offset < 0) {
+    return res.status(400).json({
+      error: "offset must be a non-negative integer",
+    });
+  }
+
+  if (limit > 100) {
+    limit = 100;
+  }
+
+  const options = {
     title: req.query.title,
-    description: req.query.description
+    description: req.query.description,
+    limit,
+    offset,
   };
 
-  model.get(filter)
-    .then(notes => res.json(notes))
-    .catch(err => handleError(err, req, res));
-
+  model
+    .get(options)
+    .then((notes) => res.json(notes))
+    .catch((err) => handleError(err, req, res));
 }
-
 
 module.exports = {
   listAction,
