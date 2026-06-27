@@ -1,7 +1,7 @@
 'use strict';
 const { body, validationResult } = require("express-validator");
 const {
-  listAction,
+  getAllAction,
   detailAction,
   createAction,
   updateAction,
@@ -26,7 +26,7 @@ const validateNote = [
   },
 ];
 
-router.get('/', listAction);
+router.get('/', getAllAction);
 router.get('/:id', detailAction);
 router.post('/', validateNote, createAction);
 router.put('/:id', validateNote, updateAction);

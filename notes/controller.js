@@ -121,10 +121,25 @@ function handleError(err, req, res) {
   res.status(500).json(err);
 }
 
+function getAllAction(req, res) {
+
+  const filter = {
+    title: req.query.title,
+    description: req.query.description
+  };
+
+  model.get(filter)
+    .then(notes => res.json(notes))
+    .catch(err => handleError(err, req, res));
+
+}
+
+
 module.exports = {
   listAction,
   detailAction,
   createAction,
   updateAction,
   deleteAction,
+  getAllAction,
 };
