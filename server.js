@@ -2,7 +2,7 @@
 // import external modules
 const express = require('express');
 const { PORT } = require('./util/config');
-const usersRoute = require('./users');
+const usersRoute = require('./notes');
 const cors = require('cors');
 
 // Optional. You will see this name in e.g. 'ps' or 'top' command
@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 });
 
 // setup '/notes' route that handles our API
-app.use('/users', usersRoute);
+app.use('/notes', usersRoute);
 
 
 app.listen(PORT, () => {

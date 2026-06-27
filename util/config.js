@@ -8,5 +8,8 @@ const PORT = process.env.SERVER_PORT || 8080;
 // set runtime environment to switch between logic, depending on environment (production, development, ...). See ../notes/model.js
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+const DB_CLIENT = process.env.DB_CLIENT || 'sqlite';
+
+
 // export configurations
 module.exports = { NODE_ENV, PORT };

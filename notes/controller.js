@@ -65,27 +65,47 @@ function createAction(req, res) {
 }
 
 function updateAction(req, res) {
+  console.log('update');
+
   const note = {
     id: req.params.id,
     title: req.body.title,
     description: req.body.description,
   };
+
   model
     .save(note)
-    .then((note) => {
-      res.json(note);
+    .then((updatedNote) => {
+      if (!updatedNote) {
+        return res
+          .status(404)
+          .json({ error: `could not find note with id [${req.params.id}]` });
+      }
+
+      res.json(updatedNote);
     })
     .catch((err) => handleError(err, req, res));
 }
 
+
 function deleteAction(req, res) {
-  console.log("delete");
+  console.log('delete');
   const id = req.params.id;
+
   model
     .delete(id)
-    .then(() => res.status(204).send())
+    .then((deleted) => {
+      if (!deleted) {
+        return res
+          .status(404)
+          .json({ error: `could not find note with id [${id}]` });
+      }
+
+      res.status(204).send();
+    })
     .catch((err) => handleError(err, req, res));
 }
+
 
 function handleError(err, req, res) {
   if (typeof err === "object" && err.message) {
